@@ -1,0 +1,83 @@
+#!/usr/bin/bash
+# vi: ft=bash
+# requirements: bash, redshift, gnu coreutils
+
+set -euo pipefail
+
+
+# global variables
+TMP_FILE="/tmp/$USER/screentemp"
+REDSHIFT_OPTS="-m randr -l 0:0"
+RESET_STATE="0:1"
+CURRENT_STATE="$RESET_STATE"
+TOGGLE_STATES="$RESET_STATE 3500:0.9"
+
+
+function helpmsg {
+    cat <<EOF
+USAGE: screen-temp (--reset|--toggle LIST)
+Toggle though screen temperature and brightness states
+
+    --help          print this help message
+    --reset         reset the current redshift settings
+    --toggle LIST   toggle through the redshift options (list of space separated \`temperature:brightness\` pairs; use \`0:1\` as the reset state)
+EOF
+}
+
+function main {
+    if (( $# > 0 )); then
+        if [[ "${1}" == "--help" ]]; then
+            helpmsg
+        fi
+
+        if [[ "${1}" == "--toggle" ]]; then
+            if (( $# >= 2 )); then
+                TOGGLE_STATES="${2}"
+            fi
+
+            if [[ -f "${TMP_FILE}" ]]; then
+                # load the current toggle state from file
+                CURRENT_STATE="$(< "${TMP_FILE}")"
+            fi
+
+            matched="false"
+            # toggle through states. using double iteration to use the first state
+            # of $TOGGLE_STATES if $CURRENT_STATE is the last state of $TOGGLE_STATES.
+            for state in $TOGGLE_STATES $TOGGLE_STATES; do
+                if [[ "$matched" == "true" ]]; then
+                    # the previous state in the iteration is the currently used state
+                    CURRENT_STATE="$state"
+                    # execure redshift with the given options, ignoring the reset state for later
+                    if [[  "$state" != "$RESET_STATE" ]]; then
+                        IFS=":" read -r temperature brightness <<< "$CURRENT_STATE"
+                        # shellcheck disable=2086
+                        redshift $REDSHIFT_OPTS -Po -O "$temperature" -g "$brightness"
+                    fi
+                    break
+                fi
+
+                if [[ "$CURRENT_STATE" == "$state" ]]; then
+                    # we have found the current state in the iteration
+                    matched="true"
+                fi
+            done
+
+            if [[ "$matched" != "true" ]]; then
+                # reset the screen if the currently used state from $TMP_FILE has not been found in $TOGGLE_STATES
+                CURRENT_STATE="$RESET_STATE"
+            fi
+        fi
+
+        if [[ "${1}" == "--reset" || "$CURRENT_STATE" == "$RESET_STATE" ]]; then
+            CURRENT_STATE="$RESET_STATE"
+            # shellcheck disable=2086
+            redshift $REDSHIFT_OPTS -x
+        fi
+    fi
+
+    mkdir -p "${TMP_FILE%/*}"
+    echo $CURRENT_STATE > "${TMP_FILE}"
+}
+
+
+main "$@"

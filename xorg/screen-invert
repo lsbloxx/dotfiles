@@ -1,0 +1,71 @@
+#!/usr/bin/bash
+# vi: ft=bash
+# requirements: bash, xrandr, xinput, gnu coreutils, grep
+
+set -euo pipefail
+
+
+# global variables
+OUTPUT=
+POINTERS=()
+
+
+function normal {
+    xrandr --output "${OUTPUT}" --rotate normal
+    for idx in ${!POINTERS[*]}; do
+        xinput set-prop "pointer:${POINTERS[$idx]}" 'Coordinate Transformation Matrix' 1 0 1 0 1 1 0 0 1
+    done
+}
+
+function invert {
+    xrandr --output "${OUTPUT}" --rotate inverted
+    for idx in ${!POINTERS[*]}; do
+        xinput set-prop "pointer:${POINTERS[$idx]}" 'Coordinate Transformation Matrix' -1 0 1 0 -1 1 0 0 1
+    done
+}
+
+function helpmsg {
+    cat <<EOF
+Usage: screen-invert --output OUTPUT [--pointers POINTERS|--all-pointers] (--toggle|--normal|--invert)
+Invert the screen orientation and mouse movements.
+
+    --help                  show this help
+    --output                set the xrandr output to manipulate
+    --pointers POINTERS     set the pointers to manipulate (semicolon separated list, see \`xinput list\`)
+    --all-pointers          manipulate all pointers
+    --normal                set screen and pointers to normal orientation
+    --invert                set screen and pointers to inverted orientation
+    --toggle                toggle screen and pointers between normal and inverted orientation
+EOF
+}
+
+function main {
+    while (( $# > 0 )); do
+        if [[ "$1" == "--output" && $# -gt 1 ]]; then
+            shift
+            OUTPUT=${OUTPUT:-$1}
+        elif [[ "$1" == "--pointers" && $# -gt 1 ]]; then
+            shift
+            readarray -t POINTERS < <(tr ";" "\n" <<< "$1")
+        elif [[ "$1" == "--all-pointers" ]]; then
+            readarray -t POINTERS < <(xinput list --short | grep -Po '.*(?<=↳\s)\K.*?(?=\s+id=.*slave\s+pointer.*)')
+        elif [[ "$1" == "--normal" && $# -eq 1 ]]; then
+            normal
+        elif [[ "$1" == "--invert" && $# -eq 1 ]]; then
+            invert
+        elif [[ "$1" == "--toggle" && $# -eq 1 ]]; then
+            if xrandr -q | grep -E "^${OUTPUT} connected [0-9+x]* inverted" &>/dev/null; then
+                normal
+            else
+                invert
+            fi
+        elif [[ "$1" == "--help" ]]; then
+            helpmsg
+            exit 0
+        fi
+        shift
+    done
+}
+
+
+main "$@"

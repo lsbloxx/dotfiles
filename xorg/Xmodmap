@@ -1,0 +1,52 @@
+! adjustments of my daily qwertz keyboard mapping
+! based on layer 3 mappings of https://www.neo-layout.org
+!
+! just type the following command in the terminal or append it to your .xinitrc file:
+! xmodmap <path to this file>
+!
+! warning: this and the original layer differ by a few mappings!
+! you can find the keycodes using the 'xev' command.
+
+
+! switch keys: capslock (66), numbersign (51), minus (61), ctrl-right (105), altgr (108)
+keycode 66 = Mode_switch NoSymbol
+keycode 105 = Mode_switch NoSymbol
+
+! upper row
+keycode 24 = q Q ellipsis ellipsis at
+keycode 25 = w W underscore underscore
+keycode 26 = e E bracketleft bracketleft EuroSign
+keycode 27 = r R bracketright bracketright
+keycode 28 = t T asciicircum asciicircum
+keycode 29 = z Z exclam exclam
+keycode 30 = u U less less
+keycode 31 = i I greater greater
+keycode 32 = o O equal equal
+keycode 33 = p P ampersand ampersand
+keycode 34 = udiaeresis Udiaeresis EuroSign EuroSign
+keycode 35 = plus asterisk plus asterisk asciitilde
+
+! middle row
+keycode 38 = a A backslash backslash
+keycode 39 = s S slash slash
+keycode 40 = d D braceleft braceleft
+keycode 41 = f F braceright braceright
+keycode 42 = g G asterisk asterisk
+keycode 43 = h H question question
+keycode 44 = j J parenleft parenleft
+keycode 45 = k K parenright parenright
+keycode 46 = l L minus minus
+keycode 47 = odiaeresis Odiaeresis colon colon
+keycode 48 = adiaeresis Adiaeresis at at
+
+! bottom row
+keycode 52 = y Y numbersign numbersign
+keycode 53 = x X dollar dollar
+keycode 54 = c C bar bar
+keycode 55 = v V asciitilde asciitilde
+keycode 56 = b B grave grave
+keycode 57 = n N plus plus
+keycode 58 = m M percent percent
+keycode 59 = comma semicolon quotedbl quotedbl
+keycode 60 = period colon apostrophe apostrophe
+keycode 61 = minus underscore semicolon semicolon
