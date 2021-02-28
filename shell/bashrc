@@ -1,0 +1,65 @@
+# vi: ft=bash
+# shellcheck disable=SC1090
+
+
+# configure the shell
+stty -ixon                              # Disable ctrl-s and ctrl-q.
+export HISTCONTROL=ignoreboth           # ignore duplicates and commands beginning with space
+export HISTSIZE=-1                      # Infinite history
+export HISTFILESIZE=-1                  # Infinite history
+
+# set the primary prompt string
+PS1=""
+if [[ -n "${SSH_CONNECTION}" ]]; then PS1="\[$(tput setaf 1)\](ssh) "; fi
+PS1="$PS1\[$(tput bold)\]\[$(tput setaf 1)\][\[$(tput setaf 3)\]\u\[$(tput setaf 2)\]@\[$(tput setaf 4)\]\h \[$(tput setaf 5)\]\W\[$(tput setaf 1)\]]"
+PS1="$PS1\[$(tput setaf 2)\]"'$([[ ! -z ${VIRTUAL_ENV} ]] && printf " (%s)" "${VIRTUAL_ENV##*/}")'
+if [[ -e "/usr/share/git/git-prompt.sh" ]]; then
+    source "/usr/share/git/git-prompt.sh"
+    GIT_PS1_SHOWDIRTYSTATE="on"
+    GIT_PS1_SHOWCOLORHINTS="on"
+    GIT_PS1_SHOWUPSTREAM="auto"
+    PS1="$PS1\[$(tput setaf 3)\]"'$(__git_ps1)'
+fi
+PS1="$PS1\[$(tput setaf 7)\]\\$ \[$(tput sgr0)\]"
+export PS1
+
+# tab completion
+bind '"\t":menu-complete'
+bind "set show-all-if-ambiguous on"
+bind "set completion-ignore-case on"
+bind "set menu-complete-display-prefix on"
+
+# load general environment variables
+if [[ -f "$HOME/.bash_env" ]]; then
+    source "$HOME/.bash_env"
+fi
+
+# load general aliases
+if [[ -f "$HOME/.bash_aliases" ]]; then
+    source "$HOME/.bash_aliases"
+fi
+
+# enable fzf autocompletion
+if (type fzf && type fd) &>/dev/null; then
+    source "/usr/share/fzf/key-bindings.bash"
+    source "/usr/share/fzf/completion.bash"
+    source "$HOME/.dotfiles/scripts/fzf-cache" "source"
+fi
+
+# use git aliases from oh-my-zsh
+if [[ -f "$HOME/.oh-my-zsh/plugins/git/git.plugin.zsh" ]] && type rg &>/dev/null; then
+    if [[ ! -f "/tmp/$USER/git.aliases" ]]; then
+        rg '^(\s+&&\s+)?(alias.*?)(\s+\\)?$' -r "\$2" < "$HOME/.oh-my-zsh/plugins/git/git.plugin.zsh" > "/tmp/$USER/git.aliases"
+    fi
+    source "/tmp/$USER/git.aliases"
+fi
+
+# use systemd aliases from oh-my-zsh
+if [[ -f "$HOME/.oh-my-zsh/plugins/systemd/systemd.plugin.zsh" ]] && type sed &>/dev/null; then
+    if [[ ! -f "/tmp/$USER/systemd.aliases" ]]; then
+    # shellcheck disable=SC2016
+    sed -n '1,/systemd_prompt_info/ { s/do\;/do/; s/$user_commands/"${user_commands[@]}"/; s/$sudo_commands/"${sudo_commands[@]}"/; /systemd_prompt_info/d; p}' < "$HOME/.oh-my-zsh/plugins/systemd/systemd.plugin.zsh" > "/tmp/$USER/systemd.aliases"
+
+    fi
+    source "/tmp/$USER/systemd.aliases"
+fi

@@ -1,0 +1,13 @@
+# vi: ft=bash
+
+export VISUAL="vim"
+export EDITOR="$VISUAL"
+export LESS="$LESS -r -i"
+
+# development
+export MAKEFLAGS="-j $(grep -c ^processor /proc/cpuinfo)"
+export ARCHFLAGS="-arch x86_64"
+
+# adjust the PATH
+export PATH="$PATH:$HOME/.local/bin"
+export PATH="$PATH:$HOME/.dotfiles/scripts"

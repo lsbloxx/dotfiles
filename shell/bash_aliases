@@ -1,0 +1,60 @@
+# vi: ft=bash
+
+# various tools
+## gnu coreutils and other basic tools
+alias cp="cp -i"
+alias mv="mv -i"
+alias rm="rm -i"
+alias md="mkdir -p"
+alias grep="grep --color=always"
+alias watch="watch --color " # keep the space to use aliases
+alias sudo="sudo "
+alias scat="sudo cat"
+alias csv="column -s ',' -t"
+alias dd='dd status=progress'
+
+## list directories and files
+alias ll="lsd --long --classify --color=always"
+alias llh="ll --human-readable --group-dirs first"
+alias la="ll --all"
+alias lah="la --human-readable --group-dirs first"
+alias lssd="ll --almost-all --human-readable --group-dirs first --sort=size --total-size"
+
+## pass
+alias pxargs="fd -HIp --regex '.gpg$' "${PASSWORD_STORE:-$HOME/.password-store/}" | sed 's|.*.password-store\/||; s|.gpg||' | fzf --reverse | xargs -ro"
+alias pshow="pxargs -- pass show"
+alias pedit="pxargs -- pass edit"
+alias pcopy="pxargs -I '{}' -- pass show -c1 '{}'"
+alias pqr="pxargs -I '{}' -- pass show '{}' | head -n 1 | qrencode -t ansiutf8 --level=M"
+
+## misc
+alias pdfgrep="pdfgrep -i -r -n"
+alias cal="cal -m"
+alias vim="vim -p"
+alias svim="sudo -E vim -p"
+alias ccat="highlight --out-format=ansi"
+alias rga="rg --hidden --no-ignore --glob '!\.git/'"
+alias fda="fd --no-ignore --hidden --exclude .git"
+alias fdd="fd --no-ignore --hidden --exclude .git --type d"
+alias umnt="sudo umount /mnt"
+## copy (rsync)
+alias cpr="rsync --progress --stats --human-readable"
+alias cprr="rsync --progress --stats --human-readable -r"
+## clipboard stuff
+alias cpc="xclip -selection clipboard"
+alias pc="xclip -o -selection clipboard"
+## find ansible modified files
+alias fdans="fd --hidden --no-ignore '\.\d+\.20[\d-]+@[\d:]+\~'"
+alias fdanschin="fdans --changed-within"
+
+# shell / terminal
+alias ..="cd ./.."
+alias ...="cd ./../.."
+alias ....="cd ./../../.."
+alias fdenv='env | sort | rg -i'
+alias fdalias='alias | sort | rg -i'
+
+## edit config files files
+alias bashrc="${EDITOR} -p $HOME/.bashrc"
+alias vimrc="${EDITOR} -p $HOME/.vimrc"
+alias zshrc="${EDITOR} ${ZDOTDIR:-$HOME}/.zshrc"
