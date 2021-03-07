@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# requirements: gnu coreutils, bash, fzf, fd/find, lz4, acpi, fzf-source
+# helpful reads:
+# - wrapping a function: https://stackoverflow.com/questions/16774538/override-a-shell-function-keep-a-reference-to-the-original-one
+
+set -euo pipefail
+
+
+# global variables
+FORCE_UPDATE=0
+
+
+function check-requirements {
+    # parameters: 1. and 2. are the same as in 'cache' function
+
+    # check for existing directories
+    if [[ ! -d "${1}"  || ! -d "${2}" ]]; then
+        return 1
+    fi
+
+    # force update (all hard requirements above are satisfied)
+    if (( FORCE_UPDATE == 1 )); then
+        return 0
+    fi
+
+    # only update cache if device is plugged in
+    if type acpi &>/dev/null && [[ ! "$(acpi -a)" =~ "on-line" ]]; then
+        return 1
+    fi
+
+    return 0
+}
+
+function cache {
+    # parameters:
+    # 1. directory to be cached
+    # 2. output directory
+    # 3. output filename
+    # 4. fd/find options
+
+    if check-requirements "${1}" "${2}"; then
+        cd "${1}" &>/dev/null
+        filepath="${2}/${3}.lz4"
+        # use the cache function but skip the cache by setting no cache directory -> use fd/find
+        if FZF_CACHE_DIR="" _fzf_compgen_path_cache "${4}" "" | lz4 --compress --quiet - "${filepath}.tmp"; then
+            mv -f "${filepath}.tmp" "${filepath}"
+        else
+            if [[ -e "${filepath}.tmp" ]]; then rm -f "${filepath}.tmp"; fi
+        fi
+        cd - &>/dev/null
+    fi
+}
+
+function cache-directories           { cache "${@}" "-type d"; }
+function cache-files                 { cache "${@}" "-type f"; }
+function cache-files-and-directories { cache "${@}" ""; }
+
+function main {
+    FZF_SOURCE="${FZF_SOURCE:-$(realpath "${0%/*}")/fzf-source}"
+    # shellcheck disable=1090
+    source "${FZF_SOURCE}"
+
+    FORCE_UPDATE=0
+    if (( $# > 0 )); then
+        if [[ "${1}" == "--force" ]]; then
+            FORCE_UPDATE=1
+        elif [[ "$1" == "--help" ]]; then
+            printf "%s [--force]\\n" "$(basename "${BASH_SOURCE[0]}")"
+            exit 0
+        fi
+    fi
+
+    # call cache functions
+    mkdir -p "${FZF_CACHE_DIR}"
+    cache-directories           "${HOME}" "${FZF_CACHE_DIR}" "$FZF_CACHE_HOME_DIRS"
+    cache-files-and-directories "${HOME}" "${FZF_CACHE_DIR}" "$FZF_CACHE_HOME_ALL"
+}
+
+
+main "$@"

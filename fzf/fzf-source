@@ -1,0 +1,54 @@
+#!/bin/bash
+# vi: ft=bash
+#
+# requirements:
+# gnu coreutils, bash/zsh, fzf, fd/find, lz4cat, rg/grep
+#
+# The code can be sourced by bash and zsh.
+# To disable the cache, set FZF_CACHE_DIR="".
+
+if type fzf &>/dev/null; then
+    FZF_PREVIEW_SCRIPT_DEFAULT="$(realpath "${BASH_SOURCE[0]:-$0}")"
+    FZF_PREVIEW_SCRIPT_DEFAULT="${FZF_PREVIEW_SCRIPT_DEFAULT%/*}/fzf-preview"
+    export FZF_PREVIEW_SCRIPT="${FZF_PREVIEW_SCRIPT:-$FZF_PREVIEW_SCRIPT_DEFAULT}"
+    export FZF_CACHE_DIR="${FZF_CACHE_DIR:-/tmp/$USER/fzf-cache/}"
+    export FZF_CACHE_HOME_ALL="home.all.fzf-cache"
+    export FZF_CACHE_HOME_DIRS="home.dirs.fzf-cache"
+
+    # export environment variables
+    export FZF_DEFAULT_COMMAND="_fzf_compgen_path_cache '' ''"
+    export FZF_CTRL_T_COMMAND="_fzf_compgen_path_cache '' '${FZF_CACHE_HOME_ALL}'"
+    export FZF_ALT_C_COMMAND="_fzf_compgen_path_cache '-type d' '${FZF_CACHE_HOME_DIRS}'"
+    export FZF_CTRL_T_OPTS="--no-height --select-1 --exit-0 --bind change:top --preview '${FZF_PREVIEW_SCRIPT} {}'"
+    export FZF_ALT_C_OPTS="${FZF_CTRL_T_OPTS}"
+    export FZF_COMPLETION_TRIGGER='**'
+    export FZF_COMPLETION_OPTS='-x --cycle --select-1 --exit-0'
+
+    function _fzf_compgen_path_cache {
+        if [[ -n "${FZF_CACHE_DIR}" && "${PWD}" =~ ^$HOME && -e "${FZF_CACHE_DIR}/${2}.lz4" ]]; then
+            # use the cache file if the cache file exists and if $PWD is somewhere within the $HOME directory
+            if [[ "${PWD}" == "${HOME}" ]]; then
+                # just use the file as input as there is no need to filter the output
+                lz4cat "${FZF_CACHE_DIR}/${2}.lz4"
+            else
+                # filter cache for files in the current directory
+                lz4cat "${FZF_CACHE_DIR}/${2}.lz4" | \
+                    if type rg &>/dev/null; then
+                        rg --color never -r "" "^${PWD/$HOME\//}/"
+                    else
+                        grep --binary-files=without-match --color=never -Po "^${PWD/$HOME\//}/\K.*"
+                    fi
+            fi
+        elif type fd &>/dev/null; then
+            # alternatively look for files with fd
+            # shellcheck disable=SC2046 # hack to unpack $1 in both shells and prepend $1 with a hypen if $1 is set for fd.
+            fd --hidden --no-ignore-vcs --exclude '.git' $(eval echo "${1:+-$1}")
+        else
+            # otherwise look for files with find
+            # shellcheck disable=SC2046 # hack to unpack $1 in both shells
+            find . -mindepth 1 -not -path '*/\.git/*' $(eval echo "${1}") -printf '%P\n'
+        fi
+    }
+
+    export _fzf_compgen_path_cache
+fi

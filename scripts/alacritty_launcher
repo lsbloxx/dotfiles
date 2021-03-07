@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# requirements: xdotool, alacritty
+# helpful reads:
+# - https://www.reddit.com/r/unixporn/comments/6f6iri/bspwm_urxvtlauncher/dig5053/
+# - https://unix.stackexchange.com/questions/450700/opening-a-programme-in-a-floating-window-in-i3/468905#468905
+
+xdotool search --onlyvisible --classname AlacrittyLauncher windowunmap || \
+    xdotool search --classname AlacrittyLauncher windowmap || \
+    alacritty \
+        --title AlacrittyLauncher \
+        --class AlacrittyLauncher \
+        -o window.dimensions.columns=160 \
+        -o window.dimensions.lines=35 \
+        --command "$@"

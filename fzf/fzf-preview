@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# requirements: file, tree, head, cat
+# optional: img2txt, pdftotext, highlight
+
+set -euo pipefail
+
+
+if ! [[ -e "${1}" ]]; then
+    printf "file/directory '%s' does not exist!\\n" "${1}"
+    # exit the script if the given parameter is neigher a file nor a directory
+    exit 1
+fi
+
+
+(
+
+MIME_TYPE="$(file --brief --mime --dereference "${1}")"
+
+# print information header
+if [[ -e "${1}" ]] && [[ ! -d "${1}" ]]; then
+    printf "%s" "${1##*/}"
+    if [[ -L "${1}" ]]; then
+        printf -- " -> %s" "$(realpath "${1}")"
+    fi
+    printf "\\n"
+    printf "%s\\n" "${MIME_TYPE}"
+    printf "\\n\\n"
+fi
+
+
+if [[ -d "${1}" ]]; then
+    # given parameter is a directory
+    if type tree &>/dev/null; then
+       tree -d -C "${1}"
+    fi
+
+elif [[ -e "${1}" ]]; then
+    # given parameter is a file
+    if [[ "$MIME_TYPE" =~ image ]] && type img2txt &>/dev/null; then
+        img2txt -f utf8 -d fstein --width $((COLUMNS / 2 - 4)) "${1}"
+    elif [[ "$MIME_TYPE" =~ application/pdf ]] && type pdftotext &>/dev/null; then
+        pdftotext -layout "${1}" -
+    elif [[ "${MIME_TYPE}" =~ application/.*executable ]]; then
+        printf "%s is a binary file\\n" "${1}"
+    elif type highlight &>/dev/null; then
+        # fall back to cat if highlight cannot detect the syntax
+        highlight "${1}" -O ansi 2>/dev/null || cat "${1}"
+    else
+       cat "${1}"
+    fi
+fi
+
+) | head -$((LINES - 2))
