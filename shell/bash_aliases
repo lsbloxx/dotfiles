@@ -21,7 +21,7 @@ alias lah="la --human-readable --group-dirs first"
 alias lssd="ll --almost-all --sizesort --human-readable --total-size"
 
 ## pass
-alias pxargs="fd -HIp --regex '.gpg$' "${PASSWORD_STORE:-$HOME/.password-store/}" | sed 's|.*.password-store\/||; s|.gpg||' | fzf --reverse | xargs -ro"
+alias pxargs="fd -HIp --regex '.gpg$' "${PASSWORD_STORE:-$HOME/.password-store/}" | sed 's|.*.password-store\/||; s|.gpg||' | fzf --reverse | xargs -ro -d '\n'"
 alias pshow="pxargs -- pass show"
 alias pedit="pxargs -- pass edit"
 alias pcopy="pxargs -I '{}' -- pass show -c1 '{}'"

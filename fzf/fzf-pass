@@ -50,7 +50,7 @@ function main {
     fi
 
     passfile=$(password_files | fuzzy)
-    nohup xargs -r pass show --clip=1 &>/dev/null <<< "$passfile" &
+    nohup xargs -r -d '\n' pass show --clip=1 &>/dev/null <<< "$passfile" &
     xdotool search --onlyvisible --pid $$ windowclose &>/dev/null
 }
 
