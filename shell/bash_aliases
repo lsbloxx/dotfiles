@@ -14,11 +14,11 @@ alias csv="column -s ',' -t"
 alias dd='dd status=progress'
 
 ## list directories and files
-alias ll="lsd --long --classify --color=always"
+alias ll="lsd --long --classify --color always"
 alias llh="ll --human-readable --group-dirs first"
 alias la="ll --all"
 alias lah="la --human-readable --group-dirs first"
-alias lssd="ll --almost-all --human-readable --group-dirs first --sort=size --total-size"
+alias lssd="ll --almost-all --sizesort --human-readable --total-size"
 
 ## pass
 alias pxargs="fd -HIp --regex '.gpg$' "${PASSWORD_STORE:-$HOME/.password-store/}" | sed 's|.*.password-store\/||; s|.gpg||' | fzf --reverse | xargs -ro"
@@ -45,6 +45,7 @@ alias cpc="xclip -selection clipboard"
 alias pc="xclip -o -selection clipboard"
 ## find ansible modified files
 alias fdans="fd --hidden --no-ignore '\.\d+\.20[\d-]+@[\d:]+\~'"
+alias fdansdiff="fdans | sed -E 's|(.*)\.([0-9]+\.[0-9:@~-]+)|\1.\2\n\1|' | xargs -r -n2 git --no-pager diff --no-index"
 alias fdanschin="fdans --changed-within"
 
 # shell / terminal

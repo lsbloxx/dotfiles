@@ -1,5 +1,7 @@
 # vi: ft=bash
 
+export DOTFILES="$HOME/.config/dotfiles"
+
 export VISUAL="vim"
 export EDITOR="$VISUAL"
 export LESS="$LESS -r -i"
@@ -11,3 +13,4 @@ export ARCHFLAGS="-arch x86_64"
 # adjust the PATH
 export PATH="$PATH:$HOME/.local/bin"
 export PATH="$PATH:$HOME/.dotfiles/scripts"
+export PATH="$PATH:$DOTFILES/scripts"
