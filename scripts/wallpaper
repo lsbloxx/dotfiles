@@ -1,0 +1,19 @@
+#!/usr/bin/bash
+
+# usage: wallpaper [FILE]
+
+# Reads image file paths from FILE and randomly selects one as the next wallpaper.
+# Lines starting with '#' will be ignored.
+
+CURRENT_WALLPAPER="/tmp/$USER/wallpaper"
+WALLPAPER_FILE="${1:-$HOME/.config/wallpapers}"
+
+touch "$CURRENT_WALLPAPER"
+envsubst "\$HOME" < "$WALLPAPER_FILE" | \
+    grep -v '^#' | \
+    grep -FvxF "$(< "$CURRENT_WALLPAPER")" - | \
+    sort --sort=random | \
+    xargs -rd '\n' find 2>/dev/null | \
+    head -n 1 | \
+    tee "$CURRENT_WALLPAPER" | \
+    xargs -rd '\n' xwallpaper --stretch
