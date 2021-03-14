@@ -51,7 +51,7 @@ function main {
                     if [[  "$state" != "$RESET_STATE" ]]; then
                         IFS=":" read -r temperature brightness <<< "$CURRENT_STATE"
                         # shellcheck disable=2086
-                        redshift $REDSHIFT_OPTS -Po -O "$temperature" -g "$brightness"
+                        redshift $REDSHIFT_OPTS -Po -O "$temperature" -b "$brightness:$brightness"
                     fi
                     break
                 fi
