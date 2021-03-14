@@ -1,19 +1,88 @@
 #!/usr/bin/bash
 
-# usage: wallpaper [FILE]
-
-# Reads image file paths from FILE and randomly selects one as the next wallpaper.
+# Reads image file paths from FILE and selects one as the next wallpaper.
 # Lines starting with '#' will be ignored.
+#
+# requirements: bash, gettext-runtime, grep, xargs, find, GNU coreutils, moreutils, xwallpaper
+#
+# usage:
+#     wallpaper --next|--random|--reset [LIST_FILE]
+#     wallpaper --image [IMAGE_FILE]
+# where IMAGE_FILE is an image file and LIST_FILE a file of paths to image files
 
-CURRENT_WALLPAPER="/tmp/$USER/wallpaper"
-WALLPAPER_FILE="${1:-$HOME/.config/wallpapers}"
 
-touch "$CURRENT_WALLPAPER"
-envsubst "\$HOME" < "$WALLPAPER_FILE" | \
-    grep -v '^#' | \
-    grep -FvxF "$(< "$CURRENT_WALLPAPER")" - | \
-    sort --sort=random | \
-    xargs -rd '\n' find 2>/dev/null | \
-    head -n 1 | \
-    tee "$CURRENT_WALLPAPER" | \
-    xargs -rd '\n' xwallpaper --stretch
+# use bash strict mode
+set -euo pipefail
+
+# global variables
+TMP_DIR="/tmp/$USER"
+CURRENT_WALLPAPER="$TMP_DIR/wallpaper"
+WALLPAPER_FILE="$HOME/.config/wallpapers"
+
+function get_existing_image_paths_from_file {
+    # read image paths from file and substitute $HOME, ignore
+    # lines starting with # and filter for existing files.
+
+    envsubst "\$HOME" < "$1" | \
+        grep -v '^#' | \
+        xargs -rd '\n' find 2>/dev/null
+}
+
+function select_next_wallpaper {
+    # select one file of the given input files as next wallpaper
+
+    if [[ "$1" == "--next" && -n "$(< "$2")" ]]; then
+        # select the next wallpaper in line
+        pee --ignore-sigpipe --ignore-write-errors cat cat 2>/dev/null | \
+            grep -Fx -A 1 -f "$2" - | \
+            head -n 2
+    else
+        # select a random wallpaper
+        grep -vxFf "$2" - | \
+            sort --sort=random
+    fi | tail -n 1
+}
+
+function set_wallpaper {
+    # set the wallpaper and create/update $CURRENT_WALLPAPER file
+
+    tee "$CURRENT_WALLPAPER.tmp" | \
+        if type xwallpaper &>/dev/null; then
+            xargs -rd '\n' xwallpaper --stretch
+        elif type feh &>/dev/null; then
+            xargs -rd '\n' feh --bg-scale
+        fi
+    mv "$CURRENT_WALLPAPER.tmp" "$CURRENT_WALLPAPER"
+}
+
+function main {
+    if (( $# >= 1 )); then
+        mkdir -p "$TMP_DIR"
+        touch "$CURRENT_WALLPAPER"
+        selection_type="$1"
+        wallpaper_file="${2:-$WALLPAPER_FILE}"
+        image_file="${2:-}"
+
+        if [[ "$selection_type" == "--reset" ]]; then
+            image_file="$(xargs -rd '\n' find < "$CURRENT_WALLPAPER" 2>/dev/null)"
+            if [[ -z "$image_file" ]]; then
+                # can not reset the current wallpaper
+                selection_type="--random"
+            else
+                # set the previous wallpaper (from $CURRENT_WALLPAPER)
+                selection_type="--image"
+            fi
+        fi
+
+        if [[ "$selection_type" == "--next" || "$selection_type" == "--random" ]]; then
+            get_existing_image_paths_from_file "$wallpaper_file" | \
+                select_next_wallpaper "$selection_type" "$CURRENT_WALLPAPER"
+        elif [[ "$selection_type" == "--image" ]]; then
+            echo "$image_file"
+        fi | set_wallpaper
+
+        cat "$CURRENT_WALLPAPER"
+    fi
+}
+
+main "$@"
