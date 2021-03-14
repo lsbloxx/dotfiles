@@ -47,6 +47,9 @@ alias pc="xclip -o -selection clipboard"
 alias fdans="fd --hidden --no-ignore '\.\d+\.20[\d-]+@[\d:]+\~'"
 alias fdansdiff="fdans | sed -E 's|(.*)\.([0-9]+\.[0-9:@~-]+)|\1.\2\n\1|' | xargs -r -n2 git --no-pager diff --no-index"
 alias fdanschin="fdans --changed-within"
+## systemctl
+alias sc-failed="systemctl --failed --all"
+alias scu-failed="systemctl --failed --all --user"
 
 # shell / terminal
 alias ..="cd ./.."
