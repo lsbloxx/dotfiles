@@ -1,0 +1,31 @@
+#!/usr/bin/bash
+
+# requirements:
+# - bash, fzf, fd/find, sudo, netctl, nohup, xdotool
+# - adjust the sudoers file to allow 'sudo netctl start …'
+
+set -euo pipefail
+
+function get_netctl_profiles {
+    cd "/etc/netctl/" || exit 1
+
+    if type fd &>/dev/null; then
+        fd --type f --max-depth 1
+    elif type find &>/dev/null; then
+        find . -maxdepth 1 -type f -printf '%P\n'
+    else
+        printf "Please install 'fd' or 'find'\\n"
+    fi
+}
+
+function main {
+    export FZF_DEFAULT_OPTS="--no-height --exit-0 --bind 'change:top' --cycle --reverse"
+    netctl_profile="$(get_netctl_profiles | fzf)"
+
+    if [[ -f "/etc/netctl/$netctl_profile" ]]; then
+        nohup sudo netctl start "$netctl_profile" &>/dev/null &
+        xdotool search --onlyvisible --pid $$ windowclose
+    fi
+}
+
+main "$@"
