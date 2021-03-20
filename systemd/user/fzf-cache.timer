@@ -1,0 +1,11 @@
+[Unit]
+Description=fzf cache update
+
+[Timer]
+WakeSystem=false
+Unit=fzf-cache.service
+Persistent=true
+OnCalendar=*:0,15,30,45
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,7 @@
+[Unit]
+Description=Auto-rotate wallpaper
+
+[Service]
+Type=simple
+ExecStartPre=/usr/bin/mkdir -p '%T/%u/'
+ExecStart=/usr/bin/bash %h/.config/dotfiles/scripts/wallpaper --random

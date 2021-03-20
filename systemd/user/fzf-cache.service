@@ -1,0 +1,10 @@
+[Unit]
+Description=fzf cache update
+
+[Service]
+Type=simple
+ExecStartPre=/usr/bin/mkdir -p '%T/%u/'
+ExecStart=/usr/bin/flock --exclusive --nonblock '%T/%u/%N.lock' --command 'bash %h/.config/dotfiles/fzf/fzf-cache'
+
+[Install]
+WantedBy=multi-user.target
