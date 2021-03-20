@@ -4,39 +4,48 @@
 # requirements: fzf, pass, bash, gpg-connect-agent, fd/find, grep, sed, gnu coreutils, xargs, xdotool
 # helpful reads:
 # - https://demu.red/blog/2016/06/how-to-check-if-your-gpg-key-is-in-cache/
+# - https://unix.stackexchange.com/questions/475352/where-does-gpg-agent-store-the-passphrase-i-need-to-restore-it
+
 
 set -euo pipefail
 shopt -s extglob
 
-
 # global variables
 ENABLE_PREVIEW="${ENABLE_PREVIEW:-0}"
-GPG_KEY_ID="${GPG_KEY_ID:-}"
+export PASSWORD_STORE_DIR="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 
-
-function password_files {
-    export PASSWORD_STORE_DIR="${PASSWORD_STORE_DIR:-$HOME/.password-store/}"
-    export PASSWORD_STORE_DIR="${PASSWORD_STORE_DIR%%+(/)}/"
+function get_password_files {
     cd "$PASSWORD_STORE_DIR"
 
     if type fd &>/dev/null; then
         fd --type f --hidden --no-ignore --extension 'gpg' | sed 's|.gpg||'
     elif type find &>/dev/null; then
-        find "$HOME/.password-store" -type f -iname '*\.gpg' | sed "s|$PASSWORD_STORE_DIR||; s|.gpg||"
+        find . -type f -iname '*\.gpg' -printf '%P\n' | sed "s|.gpg||"
     else
         # reset the gpg key id to (implicitly) disable the preview
-        GPG_KEY_ID=
+        ENABLE_PREVIEW="0"
         printf "Please install 'fd' or 'find'\\n"
     fi
 }
 
-function fuzzy {
+function is_password_store_gpg_key_agent_cached {
+    if [[ ! -e "$PASSWORD_STORE_DIR/.gpg-id" ]]; then
+        return 1
+    fi
+
+    xargs -r gpg --list-secret-keys --with-keygrip < "$PASSWORD_STORE_DIR/.gpg-id" | \
+        grep --color=never -Eo '[0-9a-fA-F]{8,}' | \
+        xargs -rI{} gpg-connect-agent 'keyinfo {}' '/bye' | \
+        grep ' 1 P ' &>/dev/null
+    return $?
+}
+
+function select_password_file {
     export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:- --no-height --exit-0 --extended --cycle --reverse}"
     export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS} --bind change:top"
 
-    if [[ "$ENABLE_PREVIEW" == "1" ]] && [[ -n "$GPG_KEY_ID" ]] && gpg-connect-agent "keyinfo $GPG_KEY_ID" '/bye' | grep ' 1 P ' &>/dev/null; then
-    FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS}"
-        fzf --bind F12:toggle-preview --preview 'pass show {}'
+    if [[ "$ENABLE_PREVIEW" == "1" ]] && is_password_store_gpg_key_agent_cached; then
+        fzf --bind "F12:toggle-preview" --preview 'pass show {}'
     else
         fzf
     fi
@@ -49,10 +58,9 @@ function main {
         fi
     fi
 
-    passfile=$(password_files | fuzzy)
+    passfile=$(get_password_files | select_password_file)
     nohup xargs -r -d '\n' pass show --clip=1 &>/dev/null <<< "$passfile" &
     xdotool search --onlyvisible --pid $$ windowclose &>/dev/null
 }
-
 
 main "$@"
