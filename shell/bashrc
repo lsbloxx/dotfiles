@@ -31,10 +31,9 @@ bind "set menu-complete-display-prefix on"
 
 
 # load environment variables and aliases
-## load general environment variables
 if [[ -f "$HOME/.bash_env" ]]; then source "$HOME/.bash_env"; fi
-## load general aliases
 if [[ -f "$HOME/.bash_aliases" ]]; then source "$HOME/.bash_aliases"; fi
+if [[ -f "$HOME/.bashrc_local" ]]; then source "$HOME/.bashrc_local"; fi
 
 
 # enable fzf autocompletion

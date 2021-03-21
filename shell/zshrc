@@ -45,6 +45,7 @@ source "/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.z
 # files below must be sourced after $ZSH/oh-my-zsh.sh
 if [[ -f "$HOME/.bash_env" ]]; then source "$HOME/.bash_env"; fi
 if [[ -f "$HOME/.bash_aliases" ]]; then source "$HOME/.bash_aliases"; fi
+if [[ -f "$HOME/.zshrc_local" ]]; then source "$HOME/.zshrc_local"; fi
 if (type fzf && (type fd || type find)) &>/dev/null; then
     source "/usr/share/fzf/key-bindings.zsh"
     source "/usr/share/fzf/completion.zsh"
