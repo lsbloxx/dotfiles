@@ -16,7 +16,7 @@ if type fzf &>/dev/null; then
     export FZF_CACHE_HOME_DIRS="home.dirs.fzf-cache"
 
     # export environment variables
-    export FZF_DEFAULT_COMMAND="_fzf_compgen_path_cache '' ''"
+    export FZF_DEFAULT_COMMAND="bash -c 'source $HOME/.config/dotfiles/fzf/fzf-source; _fzf_compgen_path_cache \"\" \"home.all.fzf-cache\"'"
     export FZF_DEFAULT_OPTS="--color fg:#e6e6dc,bg:-1,preview-fg:#e6e6dc,preview-bg:-1,hl:#c43061,fg+:#ffcc1b,bg+:-1,hl+:#c43061,info:#1c8db2,border:#1c8db2,prompt:#1c8db2,pointer:#ffcc1b,marker:#f08e48,spinner:#1c8db2,header:#f08e48"
     export FZF_CTRL_T_COMMAND="_fzf_compgen_path_cache '' '${FZF_CACHE_HOME_ALL}'"
     export FZF_ALT_C_COMMAND="_fzf_compgen_path_cache '-type d' '${FZF_CACHE_HOME_DIRS}'"
