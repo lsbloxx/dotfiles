@@ -26,7 +26,7 @@ if type fzf &>/dev/null; then
     export FZF_COMPLETION_OPTS='-x --cycle --select-1 --exit-0'
 
     function _fzf_compgen_path_cache {
-        if [[ -n "${FZF_CACHE_DIR}" && "${PWD}" =~ ^$HOME && -e "${FZF_CACHE_DIR}/${2}.lz4" ]]; then
+        if [[ -n "${2:-}" && -n "${FZF_CACHE_DIR}" && "${PWD}" =~ ^$HOME && -e "${FZF_CACHE_DIR}/${2:-}.lz4" ]]; then
             # use the cache file if the cache file exists and if $PWD is somewhere within the $HOME directory
             if [[ "${PWD}" == "${HOME}" ]]; then
                 # just use the file as input as there is no need to filter the output
@@ -47,7 +47,7 @@ if type fzf &>/dev/null; then
         else
             # otherwise look for files with find
             # shellcheck disable=SC2046 # hack to unpack $1 in both shells
-            find . -mindepth 1 -not -path '*/\.git/*' $(eval echo "${1}") -printf '%P\n'
+            find . -mindepth 1 -not -path '*/\.git/*' $(eval echo "${1:-}") -printf '%P\n'
         fi
     }
 
