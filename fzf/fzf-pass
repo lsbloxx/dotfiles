@@ -41,8 +41,7 @@ function is_password_store_gpg_key_agent_cached {
 }
 
 function select_password_file {
-    export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:- --no-height --exit-0 --extended --cycle --reverse}"
-    export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS} --bind change:top"
+    export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:-} --no-height --exit-0 --extended --cycle --reverse --bind change:top"
 
     if [[ "$ENABLE_PREVIEW" == "1" ]] && is_password_store_gpg_key_agent_cached; then
         fzf --bind "F12:toggle-preview" --preview 'pass show {}'
@@ -57,6 +56,9 @@ function main {
             ENABLE_PREVIEW="1"
         fi
     fi
+
+    # shellcheck disable=1090
+    source "${FZF_SOURCE:-$(realpath "${0%/*}")/fzf-source}"
 
     passfile=$(get_password_files | select_password_file)
     nohup xargs -r -d '\n' pass show --clip=1 &>/dev/null <<< "$passfile" &

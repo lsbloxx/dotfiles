@@ -19,7 +19,10 @@ function get_netctl_profiles {
 }
 
 function main {
-    export FZF_DEFAULT_OPTS="--no-height --exit-0 --bind 'change:top' --cycle --reverse"
+    # shellcheck disable=1090
+    source "${FZF_SOURCE:-$(realpath "${0%/*}")/fzf-source}"
+
+    export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:-} --no-height --exit-0 --bind 'change:top' --cycle --reverse"
     netctl_profile="$(get_netctl_profiles | fzf)"
 
     if [[ -f "/etc/netctl/$netctl_profile" ]]; then

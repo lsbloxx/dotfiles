@@ -11,12 +11,11 @@ set -euo pipefail
 
 
 function main {
-    FZF_SOURCE="${FZF_SOURCE:-$(realpath "${0%/*}")/fzf-source}"
     # shellcheck disable=1090
-    source "${FZF_SOURCE}"
+    source "${FZF_SOURCE:-$(realpath "${0%/*}")/fzf-source}"
 
     cd "$HOME"
-    export FZF_DEFAULT_OPTS="--no-height --exit-0 --bind change:top --preview '${FZF_PREVIEW_SCRIPT} {}' --extended --cycle --reverse"
+    export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:-} --no-height --exit-0 --bind change:top --preview '${FZF_PREVIEW_SCRIPT} {}' --extended --cycle --reverse"
     _fzf_compgen_path_cache '' "${FZF_CACHE_HOME_ALL}" | fzf > "${FZF_CACHE_DIR}/.xdg-open.tmp"
     nohup xargs -r -I '{}' xdg-open '{}' &>/dev/null < "${FZF_CACHE_DIR}/.xdg-open.tmp" &
     xdotool search --onlyvisible --pid $$ windowclose
