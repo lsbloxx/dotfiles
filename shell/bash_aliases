@@ -40,6 +40,7 @@ alias umnt="sudo umount /mnt"
 alias tws="rga '\s+$'"
 alias hlhex="rg --passthru '(#|0x)?[0-9a-fA-F]{6,}'"
 alias hlbin="rg --passthru '(0b)?[01]{8,}'"
+alias dtf='(cd "$DOTFILES" && fda --type f . | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --reverse | xargs -ro vim)'
 ## copy (rsync)
 alias cpr="rsync --progress --stats --human-readable"
 alias cprr="rsync --progress --stats --human-readable -r"
