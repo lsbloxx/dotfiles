@@ -4,7 +4,7 @@ Description=Automatically changing/rotating wallpaper
 [Timer]
 WakeSystem=false
 Unit=wallpaper-rotate.service
-OnCalendar=00/1:00
+OnCalendar=00/2:00
 
 [Install]
 WantedBy=timers.target
