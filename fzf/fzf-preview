@@ -40,7 +40,7 @@ elif [[ -e "${1}" ]]; then
     if [[ "$MIME_TYPE" =~ image ]] && type img2txt &>/dev/null; then
         img2txt -f utf8 -d fstein --width $((COLUMNS / 2 - 4)) "${1}"
     elif [[ "$MIME_TYPE" =~ application/pdf ]] && type pdftotext &>/dev/null; then
-        pdftotext -layout "${1}" -
+        pdftotext -q -layout "${1}" -
     elif [[ "${MIME_TYPE}" =~ application/.*executable ]]; then
         printf "%s is a binary file\\n" "${1}"
     elif type highlight &>/dev/null; then
