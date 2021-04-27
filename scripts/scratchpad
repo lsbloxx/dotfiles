@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+
+set -euo pipefail
+
+TMPDIR="/tmp/$USER/scratchpad"
+mkdir -p "$TMPDIR"
+
+# open an alacritty window with vim as scratchpad
+TMPFILE="$(mktemp --tmpdir="$TMPDIR")" \
+    && cd "$TMPDIR" \
+    && alacritty --class="AlacrittyVimScratchpad" -e bash -lic \
+        "vim -c 'startinsert' -c 'setlocal spell' -c 'set filetype=markdown' -c 'setlocal noeol' -c 'set binary' $TMPFILE"
+
+if [[ -s "$TMPFILE" ]]; then
+    # copy file content to clipboard
+    xclip -selection clipboard < "$TMPFILE"
+else
+    # delete empty file
+    rm -f "$TMPFILE"
+fi
