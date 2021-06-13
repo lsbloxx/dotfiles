@@ -49,10 +49,10 @@ function set_wallpaper {
     # set the wallpaper and create/update $CURRENT_WALLPAPER file
 
     tee "$CURRENT_WALLPAPER.tmp" | \
-        if type xwallpaper &>/dev/null; then
-            xargs -rd '\n' xwallpaper --stretch
-        elif type feh &>/dev/null; then
+        if type feh &>/dev/null; then
             xargs -rd '\n' feh --bg-scale
+        elif type xwallpaper &>/dev/null; then
+            xargs -rd '\n' xwallpaper --stretch
         fi
     mv "$CURRENT_WALLPAPER.tmp" "$CURRENT_WALLPAPER"
 }
