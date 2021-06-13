@@ -31,9 +31,11 @@ function get_existing_image_paths_from_file {
 function select_next_wallpaper {
     # select one file of the given input files as next wallpaper
 
-    if [[ "$1" == "--next" && -n "$(< "$2")" ]]; then
-        # select the next wallpaper in line
-        pee --ignore-sigpipe --ignore-write-errors cat cat 2>/dev/null | \
+    if [[ ( "$1" == "--next" || "$1" == "--previous" ) && -n "$(< "$2")" ]]; then
+        # select the next/previous wallpaper in line
+        ordercmd="cat"
+        if [[ "$1" == "--previous" ]]; then ordercmd="tac"; fi
+        pee --ignore-sigpipe --ignore-write-errors "$ordercmd" "$ordercmd" 2>/dev/null | \
             grep -Fx -A 1 -f "$2" - | \
             head -n 2
     else
@@ -74,7 +76,7 @@ function main {
             fi
         fi
 
-        if [[ "$selection_type" == "--next" || "$selection_type" == "--random" ]]; then
+        if [[ "$selection_type" == "--next" || "$selection_type" == "--previous" || "$selection_type" == "--random" ]]; then
             get_existing_image_paths_from_file "$wallpaper_file" | \
                 select_next_wallpaper "$selection_type" "$CURRENT_WALLPAPER"
         elif [[ "$selection_type" == "--image" ]]; then
