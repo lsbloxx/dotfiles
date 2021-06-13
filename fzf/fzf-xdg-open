@@ -17,7 +17,7 @@ function main {
     cd "$HOME"
     export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:-} --no-height --exit-0 --bind change:top --preview '${FZF_PREVIEW_SCRIPT} {}' --extended --cycle --reverse"
     _fzf_compgen_path_cache '' "${FZF_CACHE_HOME_ALL}" | fzf > "${FZF_CACHE_DIR}/.xdg-open.tmp"
-    nohup xargs -r -I '{}' xdg-open '{}' &>/dev/null < "${FZF_CACHE_DIR}/.xdg-open.tmp" &
+    tr '\n' '\0' < "${FZF_CACHE_DIR}/.xdg-open.tmp" | nohup xargs -r0I '{}' xdg-open '{}' &>/dev/null &
     xdotool search --onlyvisible --pid $$ windowclose
 }
 
