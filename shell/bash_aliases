@@ -25,7 +25,7 @@ alias pxargs="fd -HIp --regex '.gpg$' "${PASSWORD_STORE:-$HOME/.password-store/}
 alias pshow="pxargs -- pass show"
 alias pedit="pxargs -- pass edit"
 alias pcopy="pxargs -I '{}' -- pass show -c1 '{}'"
-alias pqr="pxargs -I '{}' -- pass show '{}' | head -n 1 | qrencode -t ansiutf8 --level=M"
+alias pqr="pxargs -I '{}' -- pass show '{}' | head -n 1 | tr -d '\n' | qrencode -t ansiutf8 --level=M"
 
 ## misc
 alias pdfgrep="pdfgrep -i -r -n"
