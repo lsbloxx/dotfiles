@@ -8,7 +8,6 @@ alias rm="rm -i"
 alias md="mkdir -p"
 alias grep="grep --color=always"
 alias watch="watch --color " # keep the space to use aliases
-alias sudo="sudo "
 alias scat="sudo cat"
 alias csv="column -s ',' -t"
 alias dd='dd status=progress'
