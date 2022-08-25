@@ -59,8 +59,8 @@ alias scu-failed="systemctl --failed --all --user"
 alias ..="cd ./.."
 alias ...="cd ./../.."
 alias ....="cd ./../../.."
-alias fdenv='env | sort | rg -i'
-alias fdalias='alias | sort | rg -i'
+alias rgenv='env | sort | rg -i'
+alias rgalias='alias | sort | rg -i'
 
 ## edit config files files
 alias bashrc="${EDITOR} -p $HOME/.bashrc"
