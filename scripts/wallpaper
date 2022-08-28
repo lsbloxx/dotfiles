@@ -50,7 +50,7 @@ function set_wallpaper {
 
     tee "$CURRENT_WALLPAPER.tmp" | \
         if type feh &>/dev/null; then
-            xargs -rd '\n' feh --bg-scale
+            xargs -rd '\n' feh --no-fehbg --bg-scale
         elif type xwallpaper &>/dev/null; then
             xargs -rd '\n' xwallpaper --stretch
         fi
