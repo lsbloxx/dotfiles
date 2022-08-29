@@ -1,5 +1,4 @@
 draw_bold_text_with_bright_colors: true
-background_opacity: 0.95
 live_config_reload: true
 working_directory: None
 alt_send_esc: true
@@ -10,6 +9,7 @@ env:
 window:
   decorations: full
   title: Alacritty
+  opacity: 0.95
   dynamic_title: true
   class:
     instance: Alacritty
